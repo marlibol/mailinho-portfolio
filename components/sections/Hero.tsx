@@ -3,34 +3,16 @@
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { useRef } from 'react';
 import { Spotlight } from '@/components/animations/Spotlight';
-import { site } from '@/lib/content';
+import { site, ui } from '@/lib/content';
+import { useLocale, t } from '@/lib/i18n';
 
-/**
- * Hero — first scroll-stop after the loader.
- *
- * Anatomy:
- *   - Top: index counter + handle (editorial masthead feel)
- *   - Center-left: the big oversized name with stylistic mix (italic + roman)
- *   - Center-right: a small block of metadata that reads like a magazine credit
- *   - Bottom-left: the role + tagline
- *   - Bottom-right: scroll cue
- *
- * The hero lives on a dark canvas (the Spotlight wrapper is the dark section).
- * Mouse-follow gradient inside Spotlight gives ambient atmosphere without
- * crossing into "tech demo" territory.
- *
- * On scroll, the entire hero translates up slightly slower than the rest of
- * the page (parallax) and fades — this is what gives the "diving into the work"
- * feeling when projects come up underneath.
- */
 export function Hero() {
   const ref = useRef<HTMLElement>(null);
+  const { locale } = useLocale();
 
-  // Hero parallax — the hero drifts up a bit slower than the next section,
-  // and fades as we scroll past. Both controlled by the same scroll progress.
   const { scrollYProgress } = useScroll({
     target: ref,
-    offset: ['start start', 'end start'], // 0 at top, 1 when hero leaves
+    offset: ['start start', 'end start'],
   });
 
   const y       = useTransform(scrollYProgress, [0, 1], [0, -80]);
@@ -66,9 +48,7 @@ export function Hero() {
             </motion.span>
           </div>
 
-          {/* Centerpiece */}
           <div className="flex flex-col gap-10 md:gap-14">
-            {/* The name — mixed italic + roman; this is the typographic signature */}
             <h1 className="font-display font-light text-mega text-cream tracking-tightest">
               <span className="block overflow-hidden">
                 <motion.span
@@ -92,7 +72,6 @@ export function Hero() {
               </span>
             </h1>
 
-            {/* Tagline + role — sits below the name, smaller and quieter */}
             <div className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-10">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -101,20 +80,18 @@ export function Hero() {
                 className="md:col-span-5 md:col-start-7"
               >
                 <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-cream/50 mb-3">
-                  /  Role
+                  {t(ui.stats.role, locale)}
                 </p>
                 <p className="font-display text-large font-light italic text-cream/90 leading-tight">
-                  {site.role}
+                  {t(site.role, locale)}
                 </p>
                 <p className="mt-6 max-w-md text-cream/70 leading-relaxed">
-                  {site.tagline} Hanoi-based, working across live productions,
-                  brand storytelling and editorial.
+                  {t(site.tagline, locale)}
                 </p>
               </motion.div>
             </div>
           </div>
 
-          {/* Bottom — scroll cue + status */}
           <div className="flex items-end justify-between font-mono text-[11px] uppercase tracking-[0.3em] text-cream/50">
             <motion.div
               initial={{ opacity: 0 }}
@@ -125,7 +102,7 @@ export function Hero() {
               <span className="text-cream/40">/  Status</span>
               <span className="flex items-center gap-2 text-cream">
                 <span className="size-1.5 rounded-full bg-azure animate-pulse" />
-                Available, Spring 2026
+                {t(ui.stats.status, locale)}
               </span>
             </motion.div>
 
@@ -139,10 +116,9 @@ export function Hero() {
               aria-label="Scroll to about"
             >
               <span className="text-cream/60 group-hover:text-cream transition-colors">
-                Scroll
+                {t(ui.stats.scroll, locale)}
               </span>
               <span className="relative flex h-12 w-px overflow-hidden bg-cream/20">
-                {/* The little vertical line that runs forever */}
                 <motion.span
                   className="absolute inset-0 bg-cream"
                   animate={{ y: ['-100%', '100%'] }}
@@ -153,7 +129,7 @@ export function Hero() {
           </div>
         </motion.div>
 
-        {/* Floating tagline at bottom — kinetic, drifts very slowly */}
+        {/* Floating tagline */}
         <div
           aria-hidden
           className="pointer-events-none absolute -bottom-2 left-0 right-0 z-[5] overflow-hidden"
@@ -164,10 +140,10 @@ export function Hero() {
             transition={{ duration: 60, ease: 'linear', repeat: Infinity }}
             className="flex w-max font-display text-[clamp(7rem,18vw,18rem)] font-light italic leading-[0.75] text-cream/[0.05] whitespace-nowrap"
           >
-            <span className="px-8">producing&nbsp;moments&nbsp;—</span>
-            <span className="px-8">producing&nbsp;moments&nbsp;—</span>
-            <span className="px-8">producing&nbsp;moments&nbsp;—</span>
-            <span className="px-8">producing&nbsp;moments&nbsp;—</span>
+            <span className="px-8">{locale === 'vi' ? 'kể từng khoảnh khắc —' : 'producing moments —'}</span>
+            <span className="px-8">{locale === 'vi' ? 'kể từng khoảnh khắc —' : 'producing moments —'}</span>
+            <span className="px-8">{locale === 'vi' ? 'kể từng khoảnh khắc —' : 'producing moments —'}</span>
+            <span className="px-8">{locale === 'vi' ? 'kể từng khoảnh khắc —' : 'producing moments —'}</span>
           </motion.div>
         </div>
       </section>
