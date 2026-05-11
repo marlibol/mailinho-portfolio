@@ -4,34 +4,26 @@ import { motion } from 'framer-motion';
 import { ProjectCard } from './ProjectCard';
 import { Marquee } from '@/components/ui/Marquee';
 import { SplitText } from '@/components/animations/SplitText';
-import { projects } from '@/lib/content';
+import { projects, ui } from '@/lib/content';
+import { useLocale, t } from '@/lib/i18n';
 
-/**
- * Work — the centerpiece. Selected projects, each as its own film frame.
- *
- * Between every two projects we drop a kinetic marquee. It serves two
- * purposes:
- *   - Visual break so the page doesn't read as a stack of identical cards
- *   - Acts as a "scene change" — projects feel like chapters rather than items
- *
- * The section opens with an editorial header that establishes the curation
- * (it's "Selected Works", not "All Works"). Curation is part of the credibility.
- */
 export function Work() {
+  const { locale } = useLocale();
+  const L = ui.sections.work;
+
   return (
     <section
       id="work"
       className="relative bg-cream text-ink py-24 md:py-40 grain-overlay"
     >
       <div className="container-edge">
-        {/* Section header */}
         <div className="mb-20 md:mb-32">
           <div className="flex items-end justify-between mb-10">
             <span className="font-mono text-[11px] uppercase tracking-[0.3em] text-ink/50">
-              02 / Work
+              {t(L.kicker, locale)}
             </span>
             <span className="font-mono text-[11px] uppercase tracking-[0.3em] text-ink/50">
-              {String(projects.length).padStart(2, '0')} entries
+              {String(projects.length).padStart(2, '0')} {t(L.entries, locale)}
             </span>
           </div>
 
@@ -40,7 +32,7 @@ export function Work() {
             className="font-display text-mega font-light tracking-tightest leading-[0.88] text-ink"
             stagger={0.04}
           >
-            Selected
+            {t(L.h1, locale)}
           </SplitText>
           <SplitText
             as="h2"
@@ -48,7 +40,7 @@ export function Work() {
             stagger={0.04}
             delay={0.15}
           >
-            works.
+            {t(L.h2, locale)}
           </SplitText>
 
           <motion.p
@@ -58,19 +50,15 @@ export function Work() {
             transition={{ duration: 0.9, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
             className="mt-12 max-w-xl text-ink/70 leading-relaxed"
           >
-            A short-list from the last two years &mdash; live productions
-            for institutions, brands, and artists, plus editorial work from
-            the press bench. Hover to enter, scroll to keep reading.
+            {t(L.intro, locale)}
           </motion.p>
         </div>
 
-        {/* Project entries with marquees between them */}
         <div className="flex flex-col gap-24 md:gap-40">
           {projects.map((p, i) => (
             <div key={p.slug}>
               <ProjectCard project={p} i={i} />
 
-              {/* Marquee divider — only between projects, not after the last */}
               {i < projects.length - 1 && (
                 <div className="mt-24 md:mt-40">
                   <Marquee
@@ -78,11 +66,13 @@ export function Work() {
                     direction={i % 2 === 0 ? 'left' : 'right'}
                     className="py-6"
                   >
-                    <span className="font-display text-[clamp(2.5rem,7vw,6rem)] font-light italic leading-none text-ink/15 whitespace-nowrap">
-                      {p.title}&nbsp;
-                      <span className="not-italic text-azure/40 mx-6">★</span>
-                      &nbsp;{p.venue}&nbsp;
-                      <span className="not-italic text-azure/40 mx-6">★</span>
+                    {/* CONTRAST FIX: marquee title was too faded (text-ink/15).
+                        Bumped to /35 so projects don't look like ghost text. */}
+                    <span className="font-display text-[clamp(2.5rem,7vw,6rem)] font-light italic leading-none text-ink/35 whitespace-nowrap">
+                      {t(p.title, locale)}&nbsp;
+                      <span className="not-italic text-azure/50 mx-6">★</span>
+                      &nbsp;{t(p.venue, locale)}&nbsp;
+                      <span className="not-italic text-azure/50 mx-6">★</span>
                       &nbsp;
                     </span>
                   </Marquee>
