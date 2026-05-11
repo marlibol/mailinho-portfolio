@@ -2,23 +2,10 @@ import type { Metadata, Viewport } from 'next';
 import { Fraunces, Inter_Tight, JetBrains_Mono } from 'next/font/google';
 import { AppShell } from '@/components/AppShell';
 import { Nav } from '@/components/ui/Nav';
+import { I18nProvider } from '@/lib/i18n';
 import { site } from '@/lib/content';
 import './globals.css';
 
-/**
- * Fonts.
- *
- * - Fraunces: a variable display serif by Phaedra Charles. Beautiful italics,
- *   character that reads "editorial" without being too austere. We pull
- *   a curated weight range (300–700) + italic for the body+display use.
- * - Inter Tight: a refined variant of Inter with tighter tracking that doesn't
- *   look like "generic SaaS Inter". Used for body and UI.
- * - JetBrains Mono: timestamps, indexes, kicker labels. Distinctive
- *   without the geometric coldness of IBM Plex Mono.
- *
- * We expose each through a CSS variable so the Tailwind config can reference
- * them via `var(--font-...)` and not need to know the specific font name.
- */
 const fraunces = Fraunces({
   subsets: ['latin', 'vietnamese'],
   display: 'swap',
@@ -41,22 +28,22 @@ const jetbrains = JetBrains_Mono({
   variable: '--font-mono',
 });
 
+// Metadata reads English version since this runs at build time.
+// The HTML lang attribute is updated client-side by I18nProvider after hydration.
 export const metadata: Metadata = {
-  title: `${site.name} — ${site.role}`,
-  description: site.tagline,
-  // Open Graph for social shares
+  title: `${site.name} — ${site.role.en}`,
+  description: site.tagline.en,
   openGraph: {
-    title: `${site.name} — ${site.role}`,
-    description: site.tagline,
+    title: `${site.name} — ${site.role.en}`,
+    description: site.tagline.en,
     type: 'website',
     locale: 'en_US',
   },
-  // Apple icon + viewport handled below
   authors: [{ name: site.name }],
 };
 
 export const viewport: Viewport = {
-  themeColor: '#0A0F1F', // matches the ink background — clean status bar on mobile
+  themeColor: '#0A0F1F',
   width: 'device-width',
   initialScale: 1,
   maximumScale: 5,
@@ -69,10 +56,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       className={`${fraunces.variable} ${interTight.variable} ${jetbrains.variable}`}
     >
       <body>
-        <AppShell>
-          <Nav />
-          {children}
-        </AppShell>
+        <I18nProvider>
+          <AppShell>
+            <Nav />
+            {children}
+          </AppShell>
+        </I18nProvider>
       </body>
     </html>
   );
