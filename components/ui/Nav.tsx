@@ -4,50 +4,32 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { Magnetic } from '@/components/animations/Magnetic';
-import { site } from '@/lib/content';
-import { cn } from '@/lib/cn';
-
-const NAV_ITEMS = [
-  { label: 'Index',   href: '#hero' },
-  { label: 'Note',    href: '#about' },
-  { label: 'Work',    href: '#work' },
-  { label: 'Lineage', href: '#experience' },
-  { label: 'Contact', href: '#contact' },
-];
+import { ui } from '@/lib/content';
+import { useLocale, t } from '@/lib/i18n';
 
 /**
- * Nav — minimal, fixed, breathes when you scroll past the hero.
+ * Nav — minimal, fixed, with EN/VI toggle.
  *
- * Two states:
- *  - Top of page: transparent on the dark hero, no border
- *  - Scrolled:    light glassmorphic panel that floats above content
- *
- * The transition itself is driven by useScroll → useTransform on the
- * scroll position rather than a binary boolean — that way the nav
- * fades smoothly rather than snapping at a threshold.
- *
- * The clock in the right corner ticks live (Hanoi time). It's a small
- * detail but adds tactile presence — the site feels "now" rather than
- * a static document.
+ * Numbering comes from content.ts ui.nav so it always matches the menu
+ * and the section labels. No more "03 vs 04" mismatch.
  */
 export function Nav() {
   const { scrollY } = useScroll();
   const bgOpacity = useTransform(scrollY, [0, 200], [0, 1]);
-  // We use a single transform to drive borderBottomColor (rgba string),
-  // calling useTransform at the top level — not inside JSX, which would
-  // violate the rules of hooks.
   const borderBottomColor = useTransform(
     scrollY,
     [0, 200],
     ['rgba(10,15,31,0)', 'rgba(10,15,31,0.06)']
   );
 
+  const { locale, toggle } = useLocale();
+  const items = ui.nav[locale];
+
   const [time, setTime] = useState('');
 
   useEffect(() => {
     const update = () => {
       const d = new Date();
-      // Hanoi local time, 24h
       const fmt = new Intl.DateTimeFormat('en-GB', {
         hour: '2-digit',
         minute: '2-digit',
@@ -56,17 +38,12 @@ export function Nav() {
       setTime(fmt.format(d));
     };
     update();
-    const id = setInterval(update, 30_000); // every 30s — nobody needs second precision
+    const id = setInterval(update, 30_000);
     return () => clearInterval(id);
   }, []);
 
   return (
-    <motion.header
-      className="fixed left-0 right-0 top-0 z-50"
-    >
-      {/* Background panel — opacity ramps up after the hero. Framer animates
-          backgroundColor's alpha via the borderBottomColor + bgOpacity chain
-          set up at the top of the component. */}
+    <motion.header className="fixed left-0 right-0 top-0 z-50">
       <motion.div
         className="absolute inset-0 glass"
         style={{
@@ -87,15 +64,15 @@ export function Nav() {
         </Link>
 
         {/* Center nav — desktop only */}
-        <nav className="hidden md:flex items-center gap-8">
-          {NAV_ITEMS.map((item, i) => (
+        <nav className="hidden md:flex items-center gap-7">
+          {items.slice(1).map((item) => (
             <Magnetic key={item.href} strength={0.25}>
               <Link
                 href={item.href}
                 className="group relative font-mono text-[11px] uppercase tracking-[0.25em] text-ink/70 hover:text-ink transition-colors"
                 data-cursor="hover"
               >
-                <span className="text-azure mr-2">0{i + 1}</span>
+                <span className="text-azure mr-2">{item.n}</span>
                 {item.label}
                 <span className="absolute -bottom-1 left-0 h-px w-0 bg-ink transition-all duration-500 ease-expo-out group-hover:w-full" />
               </Link>
@@ -103,21 +80,27 @@ export function Nav() {
           ))}
         </nav>
 
-        {/* Time */}
-        <div className="hidden lg:flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.25em] text-ink/70">
-          <span className="size-1.5 rounded-full bg-azure animate-pulse" />
-          <span className="tabular-nums">{time || '— —'}</span>
-          <span>HAN</span>
-        </div>
+        {/* Right cluster: language toggle + clock */}
+        <div className="flex items-center gap-4">
+          {/* Language toggle */}
+          <button
+            onClick={toggle}
+            data-cursor="hover"
+            aria-label={`Switch to ${locale === 'en' ? 'Vietnamese' : 'English'}`}
+            className="group flex items-center gap-1 font-mono text-[11px] uppercase tracking-[0.25em] text-ink/70 hover:text-ink transition-colors"
+          >
+            <span className={locale === 'en' ? 'text-ink font-medium' : 'opacity-50'}>EN</span>
+            <span className="opacity-30 mx-0.5">/</span>
+            <span className={locale === 'vi' ? 'text-ink font-medium' : 'opacity-50'}>VI</span>
+          </button>
 
-        {/* Mobile — just a quick contact link, sized to thumb */}
-        <Link
-          href="#contact"
-          className="md:hidden font-mono text-[11px] uppercase tracking-[0.25em] text-ink"
-          data-cursor="hover"
-        >
-          Contact
-        </Link>
+          {/* Time — desktop only */}
+          <div className="hidden lg:flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.25em] text-ink/70">
+            <span className="size-1.5 rounded-full bg-azure animate-pulse" />
+            <span className="tabular-nums">{time || '— —'}</span>
+            <span>HAN</span>
+          </div>
+        </div>
       </div>
     </motion.header>
   );
